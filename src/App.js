@@ -8,108 +8,105 @@ import Button from './components/Button';
 import Modal from './components/Modal';
 
 function App() {
-    // state = {
-    //     status: '',
-    //     searchQuery: '',
-    //     hits: null,
-    //     modal: false,
-    //     modalImage: '',
-    //     modalAlt: '',
-    // };
-
     const [searchQuery, setQuery] = useState('');
 
     const handleInputChange = e => {
-        setQuery({ searchQuery: e.target.value });
+        setQuery(e.target.value);
     };
 
     const [status, setStatus] = useState('');
     const [hits, setHits] = useState(null);
+
     const handleSubmit = e => {
         e.preventDefault();
 
         fetchOptions.PAGE = 1;
         fetchingImages(searchQuery)
             .then(res => {
-                setHits({ hits: res.hits });
-                setStatus({ status: 'resolved' });
+                setHits(res.hits);
+                setStatus('resolved');
             })
-            .then(setStatus({ status: 'pending' }))
+            .then(setStatus('pending'))
             .catch(err => {
-                setStatus({ status: 'rejected' });
+                setStatus('rejected');
                 console.log(err);
             });
-        console.log(status);
     };
 
-    // const onLoadMore = () => {
-    //     fetchOptions.PAGE += 1;
-    //     fetchingImages(this.state.searchQuery)
-    //         .then(res =>
-    //             this.setState(prevState => ({
-    //                 hits: [...prevState.hits, ...res.hits],
-    //                 status: 'resolved',
-    //             })),
-    //         )
-    //         .then(this.setState({ status: 'pending' }))
-    //         .catch(error => console.log(error))
-    //         .finally(() => {
-    //             window.scrollTo({
-    //                 top: document.documentElement.scrollHeight,
-    //                 behavior: 'smooth',
-    //             });
-    //         });
-    // };
+    const onLoadMore = () => {
+        fetchOptions.PAGE += 1;
+        fetchingImages(searchQuery)
+            .then(res => {
+                setHits(prevState => [...prevState, ...res.hits]);
+                setStatus('resolved');
+            })
+            .then(setStatus('pending'))
+            .catch(error => console.log(error))
+            .finally(() => {
+                window.scrollTo({
+                    top: document.documentElement.scrollHeight,
+                    behavior: 'smooth',
+                });
+            });
+    };
 
-    // const onImageClick = e => {
-    //     console.log(e.target.alt);
-    //     if (!e.target.classList.contains('ImageGalleryItem-image')) return;
-    //     this.setState({
-    //         modalImage: e.target.dataset.modal,
-    //         modal: true,
-    //         modalAlt: e.target.alt,
-    //     });
-    //     window.addEventListener('keydown', this.handleKeydown);
-    // };
+    const [modal, setModalShown] = useState(false);
+    const [modalImage, setModalImage] = useState('');
+    const [modalAlt, setModalAlt] = useState('');
 
-    // const handleBackdropClick = e => {
-    //     if (e.target.classList.contains('Overlay')) this.resetModal();
-    //     return;
-    // };
+    const onImageClick = e => {
+        console.log(e.target.alt);
+        if (!e.target.classList.contains('ImageGalleryItem-image')) return;
+        setModalImage(e.target.dataset.modal);
+        setModalAlt(e.target.alt);
+        setModalShown(true);
+        window.addEventListener('keydown', handleKeydown);
+    };
 
-    // const handleKeydown = e => {
-    //     if (e.code === 'Escape') this.resetModal();
-    // };
+    const handleBackdropClick = e => {
+        if (e.target.classList.contains('Overlay')) resetModal();
+        return;
+    };
 
-    // const resetModal = () => {
-    //     this.setState({ modalImage: '', modal: false, modalAlt: '' });
-    // };
+    const handleKeydown = e => {
+        if (e.code === 'Escape') resetModal();
+    };
+
+    const resetModal = () => {
+        setModalImage('');
+        setModalAlt('');
+        setModalShown(false);
+    };
+
     return (
         <>
             <Searchbar onSubmit={handleSubmit} onChange={handleInputChange} />
-            {/* {hits && hits.length > 0 && (
-                    <>
-                        <ImageGallery onImageClick={onImageClick} hits={hits} />
-                        <Button onLoadMore={onLoadMore} />
-                    </>
-                )}
-                {modal && (
-                    <Modal
-                        modalAlt={modalAlt}
-                        modalImage={modalImage}
-                        onClose={handleKeydown}
-                        handleBackdropClick={handleBackdropClick}
+            {hits && hits.length > 0 && (
+                <>
+                    <ImageGallery
+                        onImageClick={onImageClick}
+                        hits={[...hits]}
                     />
-                )}
-                {status === 'pending' && (
-                    <Loader
-                        className="spinner"
-                        type="TailSpin"
-                        color="#00BFFF"
-                        height={100}
-                        width={100}
-                    />
-                )} */}
+                    <Button onLoadMore={onLoadMore} />
+                </>
+            )}
+            {modal && (
+                <Modal
+                    modalAlt={modalAlt}
+                    modalImage={modalImage}
+                    onClose={handleKeydown}
+                    handleBackdropClick={handleBackdropClick}
+                />
+            )}
+            {status === 'pending' && (
+                <Loader
+                    className="spinner"
+                    type="TailSpin"
+                    color="#00BFFF"
+                    height={100}
+                    width={100}
+                />
+            )}
         </>
     );
 }
