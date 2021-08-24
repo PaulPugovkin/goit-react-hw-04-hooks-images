@@ -55,7 +55,6 @@ function App() {
     const [modalAlt, setModalAlt] = useState('');
 
     const onImageClick = e => {
-        console.log(e.target.alt);
         if (!e.target.classList.contains('ImageGalleryItem-image')) return;
         setModalImage(e.target.dataset.modal);
         setModalAlt(e.target.alt);
