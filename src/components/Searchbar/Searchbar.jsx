@@ -1,30 +1,22 @@
-import React, { Component } from 'react';
+const Searchbar = ({ onSubmit, onChange }) => {
+    return (
+        <header className="Searchbar">
+            <form className="SearchForm" onSubmit={onSubmit}>
+                <button type="submit" className="SearchForm-button">
+                    <span className="SearchForm-button-label">Search</span>
+                </button>
 
-class Searchbar extends Component {
-    state = {};
-
-    handleSubmit = () => this.props.onSubmit;
-
-    render() {
-        return (
-            <header className="Searchbar">
-                <form className="SearchForm" onSubmit={this.handleSubmit()}>
-                    <button type="submit" className="SearchForm-button">
-                        <span className="SearchForm-button-label">Search</span>
-                    </button>
-
-                    <input
-                        className="SearchForm-input"
-                        type="text"
-                        autoComplete="off"
-                        autoFocus
-                        placeholder="Search images and photos"
-                        onChange={this.props.onChange}
-                    />
-                </form>
-            </header>
-        );
-    }
-}
+                <input
+                    className="SearchForm-input"
+                    type="text"
+                    autoComplete="off"
+                    autoFocus
+                    placeholder="Search images and photos"
+                    onChange={onChange}
+                />
+            </form>
+        </header>
+    );
+};
 
 export default Searchbar;
