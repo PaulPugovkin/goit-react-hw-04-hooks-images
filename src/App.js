@@ -69,6 +69,7 @@ function App() {
 
     const handleKeydown = e => {
         if (e.code === 'Escape') resetModal();
+        window.removeEventListener('keydown', handleKeydown);
     };
 
     const resetModal = () => {
