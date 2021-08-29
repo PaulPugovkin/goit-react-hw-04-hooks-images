@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Loader from 'react-loader-spinner';
 import fetchingImages from './services/image-api';
 import { fetchOptions } from './services/image-api';
@@ -17,10 +17,8 @@ function App() {
     const [status, setStatus] = useState('');
     const [hits, setHits] = useState(null);
 
-    const handleSubmit = e => {
-        e.preventDefault();
-
-        fetchOptions.PAGE = 1;
+    useEffect(() => {
+        if (!searchQuery) return;
         fetchingImages(searchQuery)
             .then(res => {
                 setHits(res.hits);
@@ -31,7 +29,23 @@ function App() {
                 setStatus('rejected');
                 console.log(err);
             });
-    };
+    }, [searchQuery]);
+
+    // const handleSubmit = e => {
+    //     e.preventDefault();
+
+    //     fetchOptions.PAGE = 1;
+    //     fetchingImages(searchQuery)
+    //         .then(res => {
+    //             setHits(res.hits);
+    //             setStatus('resolved');
+    //         })
+    //         .then(setStatus('pending'))
+    //         .catch(err => {
+    //             setStatus('rejected');
+    //             console.log(err);
+    //         });
+    // };
 
     const onLoadMore = () => {
         fetchOptions.PAGE += 1;
@@ -80,7 +94,10 @@ function App() {
 
     return (
         <>
-            <Searchbar onSubmit={handleSubmit} onChange={handleInputChange} />
+            <Searchbar
+                // onSubmit={handleSubmit}
+                onChange={handleInputChange}
+            />
             {hits && hits.length > 0 && (
                 <>
                     <ImageGallery
