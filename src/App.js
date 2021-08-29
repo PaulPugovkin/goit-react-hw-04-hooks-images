@@ -19,6 +19,7 @@ function App() {
 
     useEffect(() => {
         if (!searchQuery) return;
+        fetchOptions.PAGE = 1;
         fetchingImages(searchQuery)
             .then(res => {
                 setHits(res.hits);
