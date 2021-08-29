@@ -29,7 +29,13 @@ function App() {
             .catch(err => {
                 setStatus('rejected');
                 console.log(err);
-            });
+            })
+            .finally(
+                window.scrollTo({
+                    top: document,
+                    behavior: 'smooth',
+                }),
+            );
     }, [searchQuery]);
 
     // const handleSubmit = e => {
