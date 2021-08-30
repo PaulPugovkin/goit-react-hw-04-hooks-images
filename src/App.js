@@ -3,10 +3,11 @@ import useDebounce from './services/debounce';
 import fetchingImages from './services/image-api';
 import { fetchOptions } from './services/image-api';
 
+import InfiniteScroll from 'react-infinite-scroll-component';
 import Loader from 'react-loader-spinner';
 import Searchbar from './components/Searchbar';
 import ImageGallery from './components/ImageGallery';
-import Button from './components/Button';
+// import Button from './components/Button';
 import Modal from './components/Modal';
 
 function App() {
@@ -18,19 +19,15 @@ function App() {
     };
 
     const [status, setStatus] = useState('');
-    const [hits, setHits] = useState(null);
+    const [hits, setHits] = useState([]);
 
-    const fetchImg = (query, scroll) => {
+    const fetchImg = query => {
         fetchingImages(query)
             .then(res => {
                 setHits(prevState =>
                     !prevState ? [...res.hits] : [...prevState, ...res.hits],
                 );
                 setStatus('resolved');
-                window.scrollTo({
-                    top: scroll,
-                    behavior: 'smooth',
-                });
             })
             .then(setStatus('pending'))
             .catch(error => console.log(error));
@@ -40,14 +37,18 @@ function App() {
         if (!debouncedSearchQuery) return;
         fetchOptions.PAGE = 1;
         if (debouncedSearchQuery) {
-            setHits(null);
-            fetchImg(debouncedSearchQuery, document);
+            setHits([]);
+            fetchImg(debouncedSearchQuery);
+            window.scrollTo({
+                top: document,
+                behavior: 'smooth',
+            });
         }
     }, [debouncedSearchQuery]);
 
     const onLoadMore = () => {
         fetchOptions.PAGE += 1;
-        fetchImg(debouncedSearchQuery, document.documentElement.scrollHeight);
+        fetchImg(debouncedSearchQuery);
     };
 
     const [modal, setModalShown] = useState(false);
@@ -81,30 +82,36 @@ function App() {
     return (
         <>
             <Searchbar onChange={handleInputChange} />
-            {hits && hits.length > 0 && (
-                <>
-                    <ImageGallery
-                        onImageClick={onImageClick}
-                        hits={[...hits]}
-                    />
-                    <Button onLoadMore={onLoadMore} />
-                </>
-            )}
+
+            <InfiniteScroll
+                dataLength={hits.length}
+                next={onLoadMore}
+                hasMore={true}
+                loader={
+                    status === 'pending' && (
+                        <Loader
+                            className="spinner"
+                            type="TailSpin"
+                            color="#00BFFF"
+                            height={100}
+                            width={100}
+                        />
+                    )
+                }
+                endMessage={
+                    <p style={{ textAlign: 'center' }}>
+                        <b>Yay! You have seen it all</b>
+                    </p>
+                }
+            >
+                <ImageGallery onImageClick={onImageClick} hits={[...hits]} />
+            </InfiniteScroll>
             {modal && (
                 <Modal
                     modalAlt={modalAlt}
                     modalImage={modalImage}
                     onClose={handleKeydown}
                     handleBackdropClick={handleBackdropClick}
-                />
-            )}
-            {status === 'pending' && (
-                <Loader
-                    className="spinner"
-                    type="TailSpin"
-                    color="#00BFFF"
-                    height={100}
-                    width={100}
                 />
             )}
         </>
