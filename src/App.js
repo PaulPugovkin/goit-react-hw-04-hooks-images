@@ -3,12 +3,12 @@ import useDebounce from './services/debounce';
 import fetchingImages from './services/image-api';
 import { fetchOptions } from './services/image-api';
 
-import InfiniteScroll from 'react-infinite-scroll-component';
-import Loader from 'react-loader-spinner';
 import Searchbar from './components/Searchbar';
 import ImageGallery from './components/ImageGallery';
-// import Button from './components/Button';
 import Modal from './components/Modal';
+import Loader from 'react-loader-spinner';
+import InfiniteScroll from 'react-infinite-scroll-component';
+import ScrollArrow from './components/ScrollArrow';
 
 function App() {
     const [searchQuery, setQuery] = useState(null);
@@ -114,6 +114,7 @@ function App() {
                     handleBackdropClick={handleBackdropClick}
                 />
             )}
+            <ScrollArrow />
         </>
     );
 }
