@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import useDebounce from './services/debounce';
 import fetchingImages from './services/image-api';
 import { fetchOptions } from './services/image-api';
@@ -20,6 +20,10 @@ function App() {
 
     const [status, setStatus] = useState('');
     const [hits, setHits] = useState([]);
+
+    const getHits = useMemo(() => {
+        return hits;
+    }, [hits]);
 
     const fetchImg = query => {
         fetchingImages(query)
@@ -104,7 +108,7 @@ function App() {
                     </p>
                 }
             >
-                <ImageGallery onImageClick={onImageClick} hits={[...hits]} />
+                <ImageGallery onImageClick={onImageClick} hits={getHits} />
             </InfiniteScroll>
             {modal && (
                 <Modal
