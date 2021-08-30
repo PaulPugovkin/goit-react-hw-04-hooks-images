@@ -20,13 +20,17 @@ function App() {
     const [status, setStatus] = useState('');
     const [hits, setHits] = useState(null);
 
-    const fetchImg = query => {
+    const fetchImg = (query, scroll) => {
         fetchingImages(query)
             .then(res => {
                 setHits(prevState =>
                     !prevState ? [...res.hits] : [...prevState, ...res.hits],
                 );
                 setStatus('resolved');
+                window.scrollTo({
+                    top: scroll,
+                    behavior: 'smooth',
+                });
             })
             .then(setStatus('pending'))
             .catch(error => console.log(error));
@@ -37,21 +41,13 @@ function App() {
         fetchOptions.PAGE = 1;
         if (debouncedSearchQuery) {
             setHits(null);
-            fetchImg(debouncedSearchQuery);
-            window.scrollTo({
-                top: document,
-                behavior: 'smooth',
-            });
+            fetchImg(debouncedSearchQuery, document);
         }
     }, [debouncedSearchQuery]);
 
     const onLoadMore = () => {
         fetchOptions.PAGE += 1;
-        fetchImg(debouncedSearchQuery);
-        window.scrollTo({
-            top: document.documentElement.scrollHeight,
-            behavior: 'smooth',
-        });
+        fetchImg(debouncedSearchQuery, document.documentElement.scrollHeight);
     };
 
     const [modal, setModalShown] = useState(false);
