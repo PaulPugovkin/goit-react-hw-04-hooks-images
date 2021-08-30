@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import Loader from 'react-loader-spinner';
+import useDebounce from './services/debounce';
 import fetchingImages from './services/image-api';
 import { fetchOptions } from './services/image-api';
+
+import Loader from 'react-loader-spinner';
 import Searchbar from './components/Searchbar';
 import ImageGallery from './components/ImageGallery';
 import Button from './components/Button';
 import Modal from './components/Modal';
 
 function App() {
-    const [searchQuery, setQuery] = useState('');
+    const [searchQuery, setQuery] = useState(null);
+    const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
     const handleInputChange = e => {
         setQuery(e.target.value);
@@ -17,58 +20,38 @@ function App() {
     const [status, setStatus] = useState('');
     const [hits, setHits] = useState(null);
 
-    useEffect(() => {
-        if (!searchQuery) return;
-        fetchOptions.PAGE = 1;
-        fetchingImages(searchQuery)
+    const fetchImg = query => {
+        fetchingImages(query)
             .then(res => {
-                setHits(res.hits);
+                setHits(prevState =>
+                    !prevState ? [...res.hits] : [...prevState, ...res.hits],
+                );
                 setStatus('resolved');
             })
             .then(setStatus('pending'))
-            .catch(err => {
-                setStatus('rejected');
-                console.log(err);
-            })
-            .finally(
-                window.scrollTo({
-                    top: document,
-                    behavior: 'smooth',
-                }),
-            );
-    }, [searchQuery]);
+            .catch(error => console.log(error));
+    };
 
-    // const handleSubmit = e => {
-    //     e.preventDefault();
-
-    //     fetchOptions.PAGE = 1;
-    //     fetchingImages(searchQuery)
-    //         .then(res => {
-    //             setHits(res.hits);
-    //             setStatus('resolved');
-    //         })
-    //         .then(setStatus('pending'))
-    //         .catch(err => {
-    //             setStatus('rejected');
-    //             console.log(err);
-    //         });
-    // };
+    useEffect(() => {
+        if (!debouncedSearchQuery) return;
+        fetchOptions.PAGE = 1;
+        if (debouncedSearchQuery) {
+            setHits(null);
+            fetchImg(debouncedSearchQuery);
+            window.scrollTo({
+                top: document,
+                behavior: 'smooth',
+            });
+        }
+    }, [debouncedSearchQuery]);
 
     const onLoadMore = () => {
         fetchOptions.PAGE += 1;
-        fetchingImages(searchQuery)
-            .then(res => {
-                setHits(prevState => [...prevState, ...res.hits]);
-                setStatus('resolved');
-            })
-            .then(setStatus('pending'))
-            .catch(error => console.log(error))
-            .finally(() => {
-                window.scrollTo({
-                    top: document.documentElement.scrollHeight,
-                    behavior: 'smooth',
-                });
-            });
+        fetchImg(debouncedSearchQuery);
+        window.scrollTo({
+            top: document.documentElement.scrollHeight,
+            behavior: 'smooth',
+        });
     };
 
     const [modal, setModalShown] = useState(false);
@@ -101,10 +84,7 @@ function App() {
 
     return (
         <>
-            <Searchbar
-                // onSubmit={handleSubmit}
-                onChange={handleInputChange}
-            />
+            <Searchbar onChange={handleInputChange} />
             {hits && hits.length > 0 && (
                 <>
                     <ImageGallery
